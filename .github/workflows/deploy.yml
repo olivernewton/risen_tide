@@ -12,18 +12,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to Namecheap via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ftp.1031brandworks.com
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 21
-          security: loose
-          local-dir: ./
-          server-dir: /public_html/risentidecharters/
-          exclude: |
-            **/.git*
-            **/.git*/**
-            .github/**
-            *.pdf
+      - name: Install lftp
+        run: sudo apt-get install -y lftp
+
+      - name: Deploy to Namecheap via lftp
+        run: |
+          lftp -c "
+            set ftp:ssl-allow yes;
+            set ssl:verify-certificate no;
+            set net:timeout 30;
+            set net:max-retries 3;
+            open -u '${{ secrets.FTP_USERNAME }}','${{ secrets.FTP_PASSWORD }}' ftp.1031brandworks.com;
+            mirror -R --verbose --ignore-time --exclude=^\.git --exclude=^\.github --exclude=\.pdf$ ./ /public_html/risentidecharters/;
+            quit
+          "
