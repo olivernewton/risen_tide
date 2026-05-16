@@ -18,6 +18,8 @@ jobs:
           server: ftp.1031brandworks.com
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          security: loose
           local-dir: ./
           server-dir: /public_html/risentidecharters/
           exclude: |
